@@ -246,171 +246,171 @@ class BFSShortestPath:
 def print_path_details(path: List[str], flight_details: List[Dict], 
                        use_case_title: str) -> None:
     """Mencetak detail jalur dengan format yang rapi untuk screenshot."""
-    print("\n" + "=" * 80)
+    print("\n" + "-" * 80)
     print(f"  {use_case_title}")
-    print("=" * 80)
+    print("-" * 80)
     
     if not path:
-        print("❌ Tidak ada rute yang ditemukan!")
+        print("Tidak ada rute yang ditemukan!")
         return
     
-    print(f"\n🛫 RUTE TERPENDEK DITEMUKAN!")
-    print(f"\n📍 Total Bandara: {len(path)}")
-    print(f"✈️  Total Transit: {len(path) - 2} (tidak termasuk asal dan tujuan)")
+    print(f"\nRUTE TERPENDEK DITEMUKAN!")
+    print(f"\nTotal Bandara: {len(path)}")
+    print(f"Total Transit: {len(path) - 2} (tidak termasuk asal dan tujuan)")
     
-    print("\n🗺️  DETAIL PERJALANAN:")
+    print("\nDETAIL PERJALANAN:")
     print("-" * 80)
     
     for i, airport in enumerate(path):
         if i == 0:
-            print(f"  [{i+1}] 🟢 START: {airport}")
+            print(f"  [{i+1}] START: {airport}")
         elif i == len(path) - 1:
-            print(f"  [{i+1}] 🔴 END:   {airport}")
+            print(f"  [{i+1}] END:   {airport}")
         else:
-            print(f"  [{i+1}] 🟡 TRANSIT: {airport}")
+            print(f"  [{i+1}] TRANSIT: {airport}")
     
-    print("\n✈️  DETAIL PENERBANGAN:")
+    print("\nDETAIL PENERBANGAN:")
     print("-" * 80)
     
     for i, detail in enumerate(flight_details):
-        print(f"\n  Segmen {i+1}: {detail['source']} → {detail['destination']}")
-        print(f"    • Maskapai: {detail['airline']} (ID: {detail['airline_id']})")
-        print(f"    • Stops: {detail['stops']}")
-        print(f"    • Equipment: {detail['equipment']}")
+        print(f"\n  Segmen {i+1}: {detail['source']} -> {detail['destination']}")
+        print(f"    Maskapai: {detail['airline']} (ID: {detail['airline_id']})")
+        print(f"    Stops: {detail['stops']}")
+        print(f"    Equipment: {detail['equipment']}")
     
-    print("\n" + "=" * 80)
+    print("\n" + "-" * 80)
 
 
 def main():
     """Fungsi utama untuk menjalankan program."""
-    print("\n" + "█" * 80)
+    print("\n" + "-" * 80)
     print("  BFS ROUTE FINDER - Pencarian Rute Terpendek dengan Queue + BFS")
-    print("█" * 80)
+    print("-" * 80)
     
     # Initialize DataLoader
-    print("\n📂 MEMUAT DATA...")
+    print("\nMEMUAT DATA...")
     loader = DataLoader('routes.csv')
     loader.load_data()
     loader.build_graph()
     
     # Initialize BFS
-    print("\n🔍 MENYIAPKAN ALGORITMA BFS...")
+    print("\nMENYIAPKAN ALGORITMA BFS...")
     bfs = BFSShortestPath(loader.graph, loader)
     
     # ============================================
     # USE CASE 1: Rute dari KZN ke LED
     # ============================================
-    print("\n\n" + "░" * 80)
+    print("\n\n" + "-" * 80)
     print("  USE CASE 1: Mencari rute dari KZN (Kazan) ke LED (St. Petersburg)")
-    print("░" * 80)
+    print("-" * 80)
     
     start1, end1 = "KZN", "LED"
     path1 = bfs.find_shortest_path(start1, end1)
     
     if path1:
         details1 = bfs.get_flight_details(path1)
-        print_path_details(path1, details1, "USE CASE 1: KZN → LED (Rute Domestik Rusia)")
+        print_path_details(path1, details1, "USE CASE 1: KZN -> LED (Rute Domestik Rusia)")
     else:
-        print(f"❌ Tidak ada rute dari {start1} ke {end1}")
+        print(f"Tidak ada rute dari {start1} ke {end1}")
     
     # ============================================
     # USE CASE 2: Rute dari SIN ke BKK
     # ============================================
-    print("\n\n" + "░" * 80)
+    print("\n\n" + "-" * 80)
     print("  USE CASE 2: Mencari rute dari SIN (Singapore) ke BKK (Bangkok)")
-    print("░" * 80)
+    print("-" * 80)
     
     start2, end2 = "SIN", "BKK"
     path2 = bfs.find_shortest_path(start2, end2)
     
     if path2:
         details2 = bfs.get_flight_details(path2)
-        print_path_details(path2, details2, "USE CASE 2: SIN → BKK (Rute Asia Tenggara)")
+        print_path_details(path2, details2, "USE CASE 2: SIN -> BKK (Rute Asia Tenggara)")
     else:
-        print(f"❌ Tidak ada rute dari {start2} ke {end2}")
+        print(f"Tidak ada rute dari {start2} ke {end2}")
     
     # ============================================
     # USE CASE 3: Rute dari MNL ke KIX
     # ============================================
-    print("\n\n" + "░" * 80)
+    print("\n\n" + "-" * 80)
     print("  USE CASE 3: Mencari rute dari MNL (Manila) ke KIX (Osaka Kansai)")
-    print("░" * 80)
+    print("-" * 80)
     
     start3, end3 = "MNL", "KIX"
     path3 = bfs.find_shortest_path(start3, end3)
     
     if path3:
         details3 = bfs.get_flight_details(path3)
-        print_path_details(path3, details3, "USE CASE 3: MNL → KIX (Rute Internasional Asia)")
+        print_path_details(path3, details3, "USE CASE 3: MNL -> KIX (Rute Internasional Asia)")
     else:
-        print(f"❌ Tidak ada rute dari {start3} ke {end3}")
+        print(f"Tidak ada rute dari {start3} ke {end3}")
     
     # ============================================
     # USE CASE 4: Rute dengan transit (contoh rute yang membutuhkan lebih dari 1 hop)
     # ============================================
-    print("\n\n" + "░" * 80)
-    print("  USE CASE 4: CEK (Chelyabinsk) → NBC (Nizhnekamsk) - Dengan Transit")
-    print("░" * 80)
+    print("\n\n" + "-" * 80)
+    print("  USE CASE 4: CEK (Chelyabinsk) -> NBC (Nizhnekamsk) - Dengan Transit")
+    print("-" * 80)
     
     start4, end4 = "CEK", "NBC"
     path4 = bfs.find_shortest_path(start4, end4)
     
     if path4:
         details4 = bfs.get_flight_details(path4)
-        print_path_details(path4, details4, "USE CASE 4: CEK → NBC (Rute dengan 1 Transit di KZN)")
+        print_path_details(path4, details4, "USE CASE 4: CEK -> NBC (Rute dengan 1 Transit di KZN)")
     else:
-        print(f"❌ Tidak ada rute dari {start4} ke {end4}")
+        print(f"Tidak ada rute dari {start4} ke {end4}")
     
     # ============================================
     # USE CASE 5: Rute Eropa dengan transit
     # ============================================
-    print("\n\n" + "░" * 80)
-    print("  USE CASE 5: ACH (Altenrhein) → MUC (Munich) - Dengan Transit")
-    print("░" * 80)
+    print("\n\n" + "-" * 80)
+    print("  USE CASE 5: ACH (Altenrhein) -> MUC (Munich) - Dengan Transit")
+    print("-" * 80)
     
     start5, end5 = "ACH", "MUC"
     path5 = bfs.find_shortest_path(start5, end5)
     
     if path5:
         details5 = bfs.get_flight_details(path5)
-        print_path_details(path5, details5, "USE CASE 5: ACH → MUC (Rute Eropa dengan 1 Transit di ZRH)")
+        print_path_details(path5, details5, "USE CASE 5: ACH -> MUC (Rute Eropa dengan 1 Transit di ZRH)")
     else:
-        print(f"❌ Tidak ada rute dari {start5} ke {end5}")
+        print(f"Tidak ada rute dari {start5} ke {end5}")
     
     # ============================================
     # USE CASE 6: Rute Amerika dengan transit
     # ============================================
-    print("\n\n" + "░" * 80)
-    print("  USE CASE 6: FLL (Fort Lauderdale) → PNS (Pensacola) - Dengan Transit")
-    print("░" * 80)
+    print("\n\n" + "-" * 80)
+    print("  USE CASE 6: FLL (Fort Lauderdale) -> PNS (Pensacola) - Dengan Transit")
+    print("-" * 80)
     
     start6, end6 = "FLL", "PNS"
     path6 = bfs.find_shortest_path(start6, end6)
     
     if path6:
         details6 = bfs.get_flight_details(path6)
-        print_path_details(path6, details6, "USE CASE 6: FLL → PNS (Rute Domestik AS dengan 1 Transit di MCO)")
+        print_path_details(path6, details6, "USE CASE 6: FLL -> PNS (Rute Domestik AS dengan 1 Transit di MCO)")
     else:
-        print(f"❌ Tidak ada rute dari {start6} ke {end6}")
+        print(f"Tidak ada rute dari {start6} ke {end6}")
     
     # ============================================
     # Additional Info: Show some available airports
     # ============================================
-    print("\n\n" + "░" * 80)
+    print("\n\n" + "-" * 80)
     print("  INFORMASI TAMBAHAN: Daftar Bandara Tersedia (Sample)")
-    print("░" * 80)
+    print("-" * 80)
     
     airports = loader.get_airport_list()
     print(f"\nTotal bandara dalam dataset: {len(airports)}")
     print("\nSample bandara:")
     for i, airport in enumerate(airports[:30]):
-        print(f"  • {airport}", end="")
+        print(f"  - {airport}", end="")
         if (i + 1) % 5 == 0:
             print()
     
-    print("\n\n" + "█" * 80)
+    print("\n\n" + "-" * 80)
     print("  PROGRAM SELESAI - Silakan screenshot output di atas")
-    print("█" * 80 + "\n")
+    print("-" * 80 + "\n")
 
 
 if __name__ == "__main__":
