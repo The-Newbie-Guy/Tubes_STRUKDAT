@@ -1,11 +1,3 @@
-"""
-BFS Route Finder - Mencari rute terpendek menggunakan algoritma Breadth-First Search (BFS)
-dengan implementasi Queue pada data rute penerbangan.
-
-Dataset: routes.csv
-Author: Assistant
-"""
-
 import csv
 from collections import deque
 from typing import Dict, List, Optional, Tuple, Set
@@ -17,17 +9,15 @@ class DataLoader:
     def __init__(self, filepath: str):
         self.filepath = filepath
         self.routes: List[Dict] = []
-        self.graph: Dict[str, Set[str]] = {}  # Adjacency list: source -> set of destinations
+        self.graph: Dict[str, Set[str]] = {}
         self.airports: Set[str] = set()
         
     def load_data(self) -> None:
         """Memuat data dari file CSV."""
         with open(self.filepath, 'r', encoding='utf-8') as file:
-            # Read content and handle Windows line endings
             content = file.read().replace('\r\n', '\n').replace('\r', '\n')
             lines = content.split('\n')
             
-            # Parse header
             header = lines[0].split(',')
             reader = csv.DictReader(lines)
             
@@ -35,11 +25,9 @@ class DataLoader:
                 source = row.get(' source airport', '').strip()
                 destination = row.get(' destination apirport', '').strip()
                 
-                # Skip invalid entries
                 if not source or not destination or source == '\\N' or destination == '\\N':
                     continue
                 
-                # Handle equipment field - it's the last column
                 equipment = row.get(' equipment', row.get('equipment', ''))
                     
                 self.routes.append({
@@ -53,7 +41,6 @@ class DataLoader:
                     'equipment': equipment.strip() if equipment else ''
                 })
                 
-                # Add to airports set
                 self.airports.add(source)
                 self.airports.add(destination)
         
@@ -120,47 +107,31 @@ class BFSShortestPath:
         self.queue = Queue()
     
     def find_shortest_path(self, start: str, end: str) -> Optional[List[str]]:
-        """
-        Mencari rute terpendek dari start ke end menggunakan BFS.
-        
-        Args:
-            start: Bandara asal
-            end: Bandara tujuan
-            
-        Returns:
-            List bandara dalam rute terpendek, atau None jika tidak ada rute
-        """
         if start not in self.graph or end not in self.graph:
             return None
         
         if start == end:
             return [start]
         
-        # Initialize BFS
         self.queue = Queue()
         visited: Set[str] = set()
         parent: Dict[str, Optional[str]] = {start: None}
         
-        # Enqueue starting node
         self.queue.enqueue(start)
         visited.add(start)
         
-        # BFS traversal
         while not self.queue.is_empty():
             current = self.queue.dequeue()
-            
-            # Check all neighbors
+
             for neighbor in self.graph.get(current, set()):
                 if neighbor not in visited:
                     visited.add(neighbor)
                     parent[neighbor] = current
                     self.queue.enqueue(neighbor)
                     
-                    # Early termination if we found the destination
                     if neighbor == end:
                         return self._reconstruct_path(parent, start, end)
         
-        # No path found
         return None
     
     def _reconstruct_path(self, parent: Dict[str, Optional[str]], 
@@ -178,24 +149,12 @@ class BFSShortestPath:
     
     def find_all_paths_with_max_depth(self, start: str, end: str, 
                                        max_depth: int = 5) -> List[List[str]]:
-        """
-        Mencari semua jalur dari start ke end dengan kedalaman maksimum.
-        
-        Args:
-            start: Bandara asal
-            end: Bandara tujuan
-            max_depth: Kedalaman maksimum pencarian
-            
-        Returns:
-            List dari semua jalur yang ditemukan
-        """
         if start not in self.graph or end not in self.graph:
             return []
         
         all_paths = []
         self._dfs_find_paths(start, end, [start], set([start]), all_paths, max_depth)
         
-        # Sort by length
         all_paths.sort(key=len)
         return all_paths
     
@@ -219,15 +178,6 @@ class BFSShortestPath:
                 visited.remove(neighbor)
     
     def get_flight_details(self, path: List[str]) -> List[Dict]:
-        """
-        Mendapatkan detail penerbangan untuk setiap segmen dalam jalur.
-        
-        Args:
-            path: List bandara dalam jalur
-            
-        Returns:
-            List detail penerbangan untuk setiap segmen
-        """
         details = []
         
         for i in range(len(path) - 1):
@@ -243,19 +193,6 @@ class BFSShortestPath:
         return details
 
     def analyze_reachability_by_level(self, start: str, max_levels: int = 5) -> Dict[int, List[str]]:
-        """
-        Menganalisis jangkauan bandara dari titik awal per level (jumlah transit).
-        Level 0 = Bandara asal
-        Level 1 = Tujuan langsung (direct flight)
-        Level 2 = 1 Transit, dst.
-        
-        Args:
-            start: Bandara asal
-            max_levels: Jumlah level maksimum untuk dianalisis
-            
-        Returns:
-            Dictionary dengan key = level, value = list bandara yang terjangkau di level tersebut
-        """
         if start not in self.graph:
             return {}
         
@@ -282,21 +219,11 @@ class BFSShortestPath:
         return levels
 
     def check_connectivity(self, start: str, end: str) -> Tuple[bool, Optional[List[str]], int, int]:
-        """
-        Mengecek apakah ada koneksi antara dua bandara dan mengembalikan info detail.
-        
-        Args:
-            start: Bandara asal
-            end: Bandara tujuan
-            
-        Returns:
-            Tuple berisi: (is_connected, shortest_path, num_transits, reachable_airports_count)
-        """
         path = self.find_shortest_path(start, end)
         is_connected = path is not None
         
         if is_connected:
-            num_transits = len(path) - 2  # Exclude start and end
+            num_transits = len(path) - 2
             if num_transits < 0:
                 num_transits = 0
         else:
@@ -431,7 +358,6 @@ def main():
     print("  BFS ROUTE FINDER - Pencarian Rute Terpendek dengan Queue + BFS")
     print("-" * 80)
     
-    # Initialize DataLoader
     print("\nMEMUAT DATA...")
     loader = DataLoader('routes.csv')
     loader.load_data()
@@ -584,7 +510,7 @@ def main():
     print_connectivity_check(start10, end10, is_connected10, path10, transits10, reachable10)
     
     # ============================================
-    # Additional Info: Show some available airports
+    # Informasi tambahan: nunjukin bandara yang tersedia di dataset
     # ============================================
     print("\n\n" + "-" * 80)
     print("  INFORMASI TAMBAHAN: Daftar Bandara Tersedia (Sample)")
@@ -597,11 +523,6 @@ def main():
         print(f"  - {airport}", end="")
         if (i + 1) % 5 == 0:
             print()
-    
-    print("\n\n" + "-" * 80)
-    print("  PROGRAM SELESAI - Silakan screenshot output di atas")
-    print("-" * 80 + "\n")
-
 
 if __name__ == "__main__":
     main()
