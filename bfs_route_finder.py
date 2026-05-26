@@ -134,8 +134,7 @@ class BFSShortestPath:
         
         return None
     
-    def _reconstruct_path(self, parent: Dict[str, Optional[str]], 
-                          start: str, end: str) -> List[str]:
+    def _reconstruct_path(self, parent: Dict[str, Optional[str]], start: str, end: str) -> List[str]:
         """Merekonstruksi jalur dari informasi parent."""
         path = []
         current = end
@@ -147,8 +146,7 @@ class BFSShortestPath:
         path.reverse()
         return path
     
-    def find_all_paths_with_max_depth(self, start: str, end: str, 
-                                       max_depth: int = 5) -> List[List[str]]:
+    def find_all_paths_with_max_depth(self, start: str, end: str, max_depth: int = 5) -> List[List[str]]:
         if start not in self.graph or end not in self.graph:
             return []
         
@@ -158,9 +156,7 @@ class BFSShortestPath:
         all_paths.sort(key=len)
         return all_paths
     
-    def _dfs_find_paths(self, current: str, end: str, path: List[str], 
-                        visited: Set[str], all_paths: List[List[str]], 
-                        max_depth: int) -> None:
+    def _dfs_find_paths(self, current: str, end: str, path: List[str], visited: Set[str], all_paths: List[List[str]], max_depth: int) -> None:
         """DFS helper untuk menemukan semua jalur."""
         if len(path) > max_depth:
             return
@@ -264,12 +260,12 @@ def print_reachability_analysis(start: str, levels: Dict[int, List[str]], title:
         airports = levels[level]
         if level == 0:
             print(f"\nLevel {level} (Asal):")
-            print(f"  → {', '.join(airports)}")
+            print(f"  -> {', '.join(airports)}")
         elif level == 1:
             print(f"\nLevel {level} (Direct Flight / Tanpa Transit):")
             print(f"  Jumlah: {len(airports)} bandara")
             if airports:
-                print(f"  → {', '.join(airports[:15])}", end="")
+                print(f"  -> {', '.join(airports[:15])}", end="")
                 if len(airports) > 15:
                     print(f" ... dan {len(airports) - 15} lainnya")
                 else:
@@ -279,7 +275,7 @@ def print_reachability_analysis(start: str, levels: Dict[int, List[str]], title:
             print(f"\nLevel {level} ({transit_count} Transit):")
             print(f"  Jumlah: {len(airports)} bandara")
             if airports:
-                print(f"  → {', '.join(airports[:10])}", end="")
+                print(f"  -> {', '.join(airports[:10])}", end="")
                 if len(airports) > 10:
                     print(f" ... dan {len(airports) - 10} lainnya")
                 else:
@@ -291,7 +287,7 @@ def print_reachability_analysis(start: str, levels: Dict[int, List[str]], title:
 def print_connectivity_check(start: str, end: str, is_connected: bool, path: Optional[List[str]], num_transits: int, reachable_count: int) -> None:
     """Mencetak hasil pengecekan konektivitas dengan format yang rapi."""
     print("\n" + "-" * 80)
-    print(f"  ANALISIS KONEKTIVITAS: {start} ↔ {end}")
+    print(f"  ANALISIS KONEKTIVITAS: {start} <-> {end}")
     print("-" * 80)
     
     print(f"\nBandara Asal: {start}")
