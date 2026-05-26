@@ -285,12 +285,10 @@ def print_reachability_analysis(start: str, levels: Dict[int, List[str]], title:
                 else:
                     print()
     
-    print("\n" + "-" * 80)
+    print("\n" + "█" * 80)
 
 
-def print_connectivity_check(start: str, end: str, is_connected: bool, 
-                             path: Optional[List[str]], num_transits: int, 
-                             reachable_count: int) -> None:
+def print_connectivity_check(start: str, end: str, is_connected: bool, path: Optional[List[str]], num_transits: int, reachable_count: int) -> None:
     """Mencetak hasil pengecekan konektivitas dengan format yang rapi."""
     print("\n" + "-" * 80)
     print(f"  ANALISIS KONEKTIVITAS: {start} ↔ {end}")
@@ -311,15 +309,14 @@ def print_connectivity_check(start: str, end: str, is_connected: bool,
     print(f"\nCakupan Jaringan dari {start}:")
     print(f"  Total bandara yang dapat dijangkau: {reachable_count}")
     
-    print("\n" + "-" * 80)
+    print("\n" + "█" * 80)
 
 
-def print_path_details(path: List[str], flight_details: List[Dict], 
-                       use_case_title: str) -> None:
+def print_path_details(path: List[str], flight_details: List[Dict], use_case_title: str) -> None:
     """Mencetak detail jalur dengan format yang rapi untuk screenshot."""
-    print("\n" + "-" * 80)
+    print("\n" + "=" * 80)
     print(f"  {use_case_title}")
-    print("-" * 80)
+    print("=" * 80)
     
     if not path:
         print("Tidak ada rute yang ditemukan!")
@@ -349,7 +346,7 @@ def print_path_details(path: List[str], flight_details: List[Dict],
         print(f"    Stops: {detail['stops']}")
         print(f"    Equipment: {detail['equipment']}")
     
-    print("\n" + "-" * 80)
+    print("\n" + "█" * 80)
 
 
 def main():
@@ -366,13 +363,11 @@ def main():
     # Initialize BFS
     print("\nMENYIAPKAN ALGORITMA BFS...")
     bfs = BFSShortestPath(loader.graph, loader)
-    
+    print("\n" + "▒" * 80)
+
     # ============================================
     # USE CASE 1: Rute dari KZN ke LED
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 1: Mencari rute dari KZN (Kazan) ke LED (St. Petersburg)")
-    print("-" * 80)
     
     start1, end1 = "KZN", "LED"
     path1 = bfs.find_shortest_path(start1, end1)
@@ -386,9 +381,6 @@ def main():
     # ============================================
     # USE CASE 2: Rute dari SIN ke BKK
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 2: Mencari rute dari SIN (Singapore) ke BKK (Bangkok)")
-    print("-" * 80)
     
     start2, end2 = "SIN", "BKK"
     path2 = bfs.find_shortest_path(start2, end2)
@@ -402,9 +394,6 @@ def main():
     # ============================================
     # USE CASE 3: Rute dari MNL ke KIX
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 3: Mencari rute dari MNL (Manila) ke KIX (Osaka Kansai)")
-    print("-" * 80)
     
     start3, end3 = "MNL", "KIX"
     path3 = bfs.find_shortest_path(start3, end3)
@@ -418,9 +407,6 @@ def main():
     # ============================================
     # USE CASE 4: Rute dengan transit (contoh rute yang membutuhkan lebih dari 1 hop)
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 4: CEK (Chelyabinsk) -> NBC (Nizhnekamsk) - Dengan Transit")
-    print("-" * 80)
     
     start4, end4 = "CEK", "NBC"
     path4 = bfs.find_shortest_path(start4, end4)
@@ -434,9 +420,6 @@ def main():
     # ============================================
     # USE CASE 5: Rute Eropa dengan transit
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 5: ACH (Altenrhein) -> MUC (Munich) - Dengan Transit")
-    print("-" * 80)
     
     start5, end5 = "ACH", "MUC"
     path5 = bfs.find_shortest_path(start5, end5)
@@ -450,9 +433,6 @@ def main():
     # ============================================
     # USE CASE 6: Rute Amerika dengan transit
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 6: FLL (Fort Lauderdale) -> PNS (Pensacola) - Dengan Transit")
-    print("-" * 80)
     
     start6, end6 = "FLL", "PNS"
     path6 = bfs.find_shortest_path(start6, end6)
@@ -466,33 +446,22 @@ def main():
     # ============================================
     # USE CASE 7: Analisis Jangkauan per Level (KZN)
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 7: Analisis Jangkauan per Level dari KZN (Kazan)")
-    print("-" * 80)
     
     start7 = "KZN"
     levels7 = bfs.analyze_reachability_by_level(start7, max_levels=4)
-    print_reachability_analysis(start7, levels7, 
-                                "USE CASE 7: ANALISIS JANGKAUAN PER LEVEL - KZN (Kazan)")
+    print_reachability_analysis(start7, levels7, "USE CASE 7: ANALISIS JANGKAUAN PER LEVEL - KZN (Kazan)")
     
     # ============================================
     # USE CASE 8: Analisis Jangkauan per Level (SIN)
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 8: Analisis Jangkauan per Level dari SIN (Singapore)")
-    print("-" * 80)
     
     start8 = "SIN"
     levels8 = bfs.analyze_reachability_by_level(start8, max_levels=4)
-    print_reachability_analysis(start8, levels8, 
-                                "USE CASE 8: ANALISIS JANGKAUAN PER LEVEL - SIN (Singapore)")
+    print_reachability_analysis(start8, levels8, "USE CASE 8: ANALISIS JANGKAUAN PER LEVEL - SIN (Singapore)")
     
     # ============================================
     # USE CASE 9: Cek Konektivitas - Terhubung
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 9: Cek Konektivitas - Rute Terhubung")
-    print("-" * 80)
     
     start9, end9 = "KZN", "LED"
     is_connected9, path9, transits9, reachable9 = bfs.check_connectivity(start9, end9)
@@ -501,9 +470,6 @@ def main():
     # ============================================
     # USE CASE 10: Cek Konektivitas - Tidak Terhubung
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 10: Cek Konektivitas - Rute Tidak Terhubung")
-    print("-" * 80)
     
     start10, end10 = "KZN", "JFK"  # JFK mungkin tidak terhubung langsung ke jaringan KZN
     is_connected10, path10, transits10, reachable10 = bfs.check_connectivity(start10, end10)
@@ -512,9 +478,6 @@ def main():
     # ============================================
     # Informasi tambahan: nunjukin bandara yang tersedia di dataset
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  INFORMASI TAMBAHAN: Daftar Bandara Tersedia (Sample)")
-    print("-" * 80)
     
     airports = loader.get_airport_list()
     print(f"\nTotal bandara dalam dataset: {len(airports)}")
