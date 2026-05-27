@@ -62,7 +62,6 @@ Kelas yang mengimplementasikan algoritma BFS untuk:
 ├── README.md               # Dokumentasi proyek (file ini)
 ├── routes.csv              # Dataset rute penerbangan
 ├── bfs_route_finder.py     # Kode utama implementasi OOP + Queue + BFS
-└── screenshots/            # Folder untuk menyimpan hasil screenshot (jika ada)
 ```
 
 ---
@@ -91,7 +90,7 @@ Kelas yang mengimplementasikan algoritma BFS untuk:
 
 ---
 
-## 📸 Use Case yang Tersedia
+## Use Case yang Tersedia
 
 ### A. Pencarian Rute Terpendek
 1. **KZN → LED**: Rute domestik Rusia
