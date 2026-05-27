@@ -165,10 +165,4 @@ Melalui proyek ini, mahasiswa diharapkan dapat:
 
 ---
 
-## 📄 Lisensi
-
-Proyek ini dibuat untuk keperluan akademis mata kuliah Struktur Data - Kelompok 2.
-
----
-
 **Dibuat dengan ❤️ oleh Kelompok 2 Struktur Data**
