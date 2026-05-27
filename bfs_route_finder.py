@@ -242,6 +242,150 @@ class BFSShortestPath:
         
         return details
 
+    def analyze_reachability_by_level(self, start: str, max_levels: int = 5) -> Dict[int, List[str]]:
+        """
+        Menganalisis jangkauan bandara dari titik awal per level (jumlah transit).
+        Level 0 = Bandara asal
+        Level 1 = Tujuan langsung (direct flight)
+        Level 2 = 1 Transit, dst.
+        
+        Args:
+            start: Bandara asal
+            max_levels: Jumlah level maksimum untuk dianalisis
+            
+        Returns:
+            Dictionary dengan key = level, value = list bandara yang terjangkau di level tersebut
+        """
+        if start not in self.graph:
+            return {}
+        
+        levels: Dict[int, List[str]] = {i: [] for i in range(max_levels + 1)}
+        visited: Set[str] = set()
+        queue = Queue()
+        queue.enqueue((start, 0))  # (node, level)
+        visited.add(start)
+        levels[0].append(start)
+        
+        while not queue.is_empty():
+            current_node, current_level = queue.dequeue()
+            
+            if current_level >= max_levels:
+                continue
+            
+            next_level = current_level + 1
+            for neighbor in sorted(self.graph.get(current_node, set())):
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    levels[next_level].append(neighbor)
+                    queue.enqueue((neighbor, next_level))
+        
+        return levels
+
+    def check_connectivity(self, start: str, end: str) -> Tuple[bool, Optional[List[str]], int, int]:
+        """
+        Mengecek apakah ada koneksi antara dua bandara dan mengembalikan info detail.
+        
+        Args:
+            start: Bandara asal
+            end: Bandara tujuan
+            
+        Returns:
+            Tuple berisi: (is_connected, shortest_path, num_transits, reachable_airports_count)
+        """
+        path = self.find_shortest_path(start, end)
+        is_connected = path is not None
+        
+        if is_connected:
+            num_transits = len(path) - 2  # Exclude start and end
+            if num_transits < 0:
+                num_transits = 0
+        else:
+            num_transits = -1
+        
+        # Hitung berapa banyak bandara yang bisa dicapai dari start
+        reachable_count = 0
+        visited = set()
+        q = Queue()
+        q.enqueue(start)
+        visited.add(start)
+        
+        while not q.is_empty():
+            node = q.dequeue()
+            reachable_count += 1
+            for neighbor in self.graph.get(node, set()):
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    q.enqueue(neighbor)
+        
+        return is_connected, path, num_transits, reachable_count
+
+
+def print_reachability_analysis(start: str, levels: Dict[int, List[str]], title: str) -> None:
+    """Mencetak analisis jangkauan per level dengan format yang rapi."""
+    print("\n" + "-" * 80)
+    print(f"  {title}")
+    print("-" * 80)
+    
+    total_reachable = sum(len(airports) for airports in levels.values())
+    print(f"\nBandara Asal: {start}")
+    print(f"Total Bandara Terjangkau: {total_reachable - 1} (tidak termasuk asal)")
+    
+    print("\nJANGKAUAN PER LEVEL:")
+    print("-" * 80)
+    
+    for level in sorted(levels.keys()):
+        airports = levels[level]
+        if level == 0:
+            print(f"\nLevel {level} (Asal):")
+            print(f"  → {', '.join(airports)}")
+        elif level == 1:
+            print(f"\nLevel {level} (Direct Flight / Tanpa Transit):")
+            print(f"  Jumlah: {len(airports)} bandara")
+            if airports:
+                print(f"  → {', '.join(airports[:15])}", end="")
+                if len(airports) > 15:
+                    print(f" ... dan {len(airports) - 15} lainnya")
+                else:
+                    print()
+        else:
+            transit_count = level - 1
+            print(f"\nLevel {level} ({transit_count} Transit):")
+            print(f"  Jumlah: {len(airports)} bandara")
+            if airports:
+                print(f"  → {', '.join(airports[:10])}", end="")
+                if len(airports) > 10:
+                    print(f" ... dan {len(airports) - 10} lainnya")
+                else:
+                    print()
+    
+    print("\n" + "-" * 80)
+
+
+def print_connectivity_check(start: str, end: str, is_connected: bool, 
+                             path: Optional[List[str]], num_transits: int, 
+                             reachable_count: int) -> None:
+    """Mencetak hasil pengecekan konektivitas dengan format yang rapi."""
+    print("\n" + "-" * 80)
+    print(f"  ANALISIS KONEKTIVITAS: {start} ↔ {end}")
+    print("-" * 80)
+    
+    print(f"\nBandara Asal: {start}")
+    print(f"Bandara Tujuan: {end}")
+    print(f"\nStatus Koneksi: {'✓ TERHUBUNG' if is_connected else '✗ TIDAK TERHUBUNG'}")
+    
+    if is_connected and path:
+        print(f"\nRute Terpendek Ditemukan:")
+        print(f"  Path: {' → '.join(path)}")
+        print(f"  Jumlah Transit: {num_transits}")
+        print(f"  Total Segmen Penerbangan: {len(path) - 1}")
+    else:
+        print("\nTidak ada rute yang tersedia antara kedua bandara ini.")
+    
+    print(f"\nCakupan Jaringan dari {start}:")
+    print(f"  Total bandara yang dapat dijangkau: {reachable_count}")
+    
+    print("\n" + "-" * 80)
+
 
 def print_path_details(path: List[str], flight_details: List[Dict], 
                        use_case_title: str) -> None:
@@ -392,6 +536,52 @@ def main():
         print_path_details(path6, details6, "USE CASE 6: FLL -> PNS (Rute Domestik AS dengan 1 Transit di MCO)")
     else:
         print(f"Tidak ada rute dari {start6} ke {end6}")
+    
+    # ============================================
+    # USE CASE 7: Analisis Jangkauan per Level (KZN)
+    # ============================================
+    print("\n\n" + "-" * 80)
+    print("  USE CASE 7: Analisis Jangkauan per Level dari KZN (Kazan)")
+    print("-" * 80)
+    
+    start7 = "KZN"
+    levels7 = bfs.analyze_reachability_by_level(start7, max_levels=4)
+    print_reachability_analysis(start7, levels7, 
+                                "USE CASE 7: ANALISIS JANGKAUAN PER LEVEL - KZN (Kazan)")
+    
+    # ============================================
+    # USE CASE 8: Analisis Jangkauan per Level (SIN)
+    # ============================================
+    print("\n\n" + "-" * 80)
+    print("  USE CASE 8: Analisis Jangkauan per Level dari SIN (Singapore)")
+    print("-" * 80)
+    
+    start8 = "SIN"
+    levels8 = bfs.analyze_reachability_by_level(start8, max_levels=4)
+    print_reachability_analysis(start8, levels8, 
+                                "USE CASE 8: ANALISIS JANGKAUAN PER LEVEL - SIN (Singapore)")
+    
+    # ============================================
+    # USE CASE 9: Cek Konektivitas - Terhubung
+    # ============================================
+    print("\n\n" + "-" * 80)
+    print("  USE CASE 9: Cek Konektivitas - Rute Terhubung")
+    print("-" * 80)
+    
+    start9, end9 = "KZN", "LED"
+    is_connected9, path9, transits9, reachable9 = bfs.check_connectivity(start9, end9)
+    print_connectivity_check(start9, end9, is_connected9, path9, transits9, reachable9)
+    
+    # ============================================
+    # USE CASE 10: Cek Konektivitas - Tidak Terhubung
+    # ============================================
+    print("\n\n" + "-" * 80)
+    print("  USE CASE 10: Cek Konektivitas - Rute Tidak Terhubung")
+    print("-" * 80)
+    
+    start10, end10 = "KZN", "JFK"  # JFK mungkin tidak terhubung langsung ke jaringan KZN
+    is_connected10, path10, transits10, reachable10 = bfs.check_connectivity(start10, end10)
+    print_connectivity_check(start10, end10, is_connected10, path10, transits10, reachable10)
     
     # ============================================
     # Additional Info: Show some available airports
