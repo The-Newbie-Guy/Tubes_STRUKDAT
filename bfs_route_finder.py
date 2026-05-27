@@ -1,11 +1,3 @@
-"""
-BFS Route Finder - Mencari rute terpendek menggunakan algoritma Breadth-First Search (BFS)
-dengan implementasi Queue pada data rute penerbangan.
-
-Dataset: routes.csv
-Author: Assistant
-"""
-
 import csv
 from collections import deque
 from typing import Dict, List, Optional, Tuple, Set
@@ -17,17 +9,15 @@ class DataLoader:
     def __init__(self, filepath: str):
         self.filepath = filepath
         self.routes: List[Dict] = []
-        self.graph: Dict[str, Set[str]] = {}  # Adjacency list: source -> set of destinations
+        self.graph: Dict[str, Set[str]] = {}
         self.airports: Set[str] = set()
         
     def load_data(self) -> None:
         """Memuat data dari file CSV."""
         with open(self.filepath, 'r', encoding='utf-8') as file:
-            # Read content and handle Windows line endings
             content = file.read().replace('\r\n', '\n').replace('\r', '\n')
             lines = content.split('\n')
             
-            # Parse header
             header = lines[0].split(',')
             reader = csv.DictReader(lines)
             
@@ -35,11 +25,9 @@ class DataLoader:
                 source = row.get(' source airport', '').strip()
                 destination = row.get(' destination apirport', '').strip()
                 
-                # Skip invalid entries
                 if not source or not destination or source == '\\N' or destination == '\\N':
                     continue
                 
-                # Handle equipment field - it's the last column
                 equipment = row.get(' equipment', row.get('equipment', ''))
                     
                 self.routes.append({
@@ -53,7 +41,6 @@ class DataLoader:
                     'equipment': equipment.strip() if equipment else ''
                 })
                 
-                # Add to airports set
                 self.airports.add(source)
                 self.airports.add(destination)
         
@@ -120,51 +107,34 @@ class BFSShortestPath:
         self.queue = Queue()
     
     def find_shortest_path(self, start: str, end: str) -> Optional[List[str]]:
-        """
-        Mencari rute terpendek dari start ke end menggunakan BFS.
-        
-        Args:
-            start: Bandara asal
-            end: Bandara tujuan
-            
-        Returns:
-            List bandara dalam rute terpendek, atau None jika tidak ada rute
-        """
         if start not in self.graph or end not in self.graph:
             return None
         
         if start == end:
             return [start]
         
-        # Initialize BFS
         self.queue = Queue()
         visited: Set[str] = set()
         parent: Dict[str, Optional[str]] = {start: None}
         
-        # Enqueue starting node
         self.queue.enqueue(start)
         visited.add(start)
         
-        # BFS traversal
         while not self.queue.is_empty():
             current = self.queue.dequeue()
-            
-            # Check all neighbors
+
             for neighbor in self.graph.get(current, set()):
                 if neighbor not in visited:
                     visited.add(neighbor)
                     parent[neighbor] = current
                     self.queue.enqueue(neighbor)
                     
-                    # Early termination if we found the destination
                     if neighbor == end:
                         return self._reconstruct_path(parent, start, end)
         
-        # No path found
         return None
     
-    def _reconstruct_path(self, parent: Dict[str, Optional[str]], 
-                          start: str, end: str) -> List[str]:
+    def _reconstruct_path(self, parent: Dict[str, Optional[str]], start: str, end: str) -> List[str]:
         """Merekonstruksi jalur dari informasi parent."""
         path = []
         current = end
@@ -176,32 +146,17 @@ class BFSShortestPath:
         path.reverse()
         return path
     
-    def find_all_paths_with_max_depth(self, start: str, end: str, 
-                                       max_depth: int = 5) -> List[List[str]]:
-        """
-        Mencari semua jalur dari start ke end dengan kedalaman maksimum.
-        
-        Args:
-            start: Bandara asal
-            end: Bandara tujuan
-            max_depth: Kedalaman maksimum pencarian
-            
-        Returns:
-            List dari semua jalur yang ditemukan
-        """
+    def find_all_paths_with_max_depth(self, start: str, end: str, max_depth: int = 5) -> List[List[str]]:
         if start not in self.graph or end not in self.graph:
             return []
         
         all_paths = []
         self._dfs_find_paths(start, end, [start], set([start]), all_paths, max_depth)
         
-        # Sort by length
         all_paths.sort(key=len)
         return all_paths
     
-    def _dfs_find_paths(self, current: str, end: str, path: List[str], 
-                        visited: Set[str], all_paths: List[List[str]], 
-                        max_depth: int) -> None:
+    def _dfs_find_paths(self, current: str, end: str, path: List[str], visited: Set[str], all_paths: List[List[str]], max_depth: int) -> None:
         """DFS helper untuk menemukan semua jalur."""
         if len(path) > max_depth:
             return
@@ -219,15 +174,6 @@ class BFSShortestPath:
                 visited.remove(neighbor)
     
     def get_flight_details(self, path: List[str]) -> List[Dict]:
-        """
-        Mendapatkan detail penerbangan untuk setiap segmen dalam jalur.
-        
-        Args:
-            path: List bandara dalam jalur
-            
-        Returns:
-            List detail penerbangan untuk setiap segmen
-        """
         details = []
         
         for i in range(len(path) - 1):
@@ -243,19 +189,6 @@ class BFSShortestPath:
         return details
 
     def analyze_reachability_by_level(self, start: str, max_levels: int = 5) -> Dict[int, List[str]]:
-        """
-        Menganalisis jangkauan bandara dari titik awal per level (jumlah transit).
-        Level 0 = Bandara asal
-        Level 1 = Tujuan langsung (direct flight)
-        Level 2 = 1 Transit, dst.
-        
-        Args:
-            start: Bandara asal
-            max_levels: Jumlah level maksimum untuk dianalisis
-            
-        Returns:
-            Dictionary dengan key = level, value = list bandara yang terjangkau di level tersebut
-        """
         if start not in self.graph:
             return {}
         
@@ -282,21 +215,11 @@ class BFSShortestPath:
         return levels
 
     def check_connectivity(self, start: str, end: str) -> Tuple[bool, Optional[List[str]], int, int]:
-        """
-        Mengecek apakah ada koneksi antara dua bandara dan mengembalikan info detail.
-        
-        Args:
-            start: Bandara asal
-            end: Bandara tujuan
-            
-        Returns:
-            Tuple berisi: (is_connected, shortest_path, num_transits, reachable_airports_count)
-        """
         path = self.find_shortest_path(start, end)
         is_connected = path is not None
         
         if is_connected:
-            num_transits = len(path) - 2  # Exclude start and end
+            num_transits = len(path) - 2
             if num_transits < 0:
                 num_transits = 0
         else:
@@ -337,12 +260,12 @@ def print_reachability_analysis(start: str, levels: Dict[int, List[str]], title:
         airports = levels[level]
         if level == 0:
             print(f"\nLevel {level} (Asal):")
-            print(f"  → {', '.join(airports)}")
+            print(f"  -> {', '.join(airports)}")
         elif level == 1:
             print(f"\nLevel {level} (Direct Flight / Tanpa Transit):")
             print(f"  Jumlah: {len(airports)} bandara")
             if airports:
-                print(f"  → {', '.join(airports[:15])}", end="")
+                print(f"  -> {', '.join(airports[:15])}", end="")
                 if len(airports) > 15:
                     print(f" ... dan {len(airports) - 15} lainnya")
                 else:
@@ -352,21 +275,19 @@ def print_reachability_analysis(start: str, levels: Dict[int, List[str]], title:
             print(f"\nLevel {level} ({transit_count} Transit):")
             print(f"  Jumlah: {len(airports)} bandara")
             if airports:
-                print(f"  → {', '.join(airports[:10])}", end="")
+                print(f"  -> {', '.join(airports[:10])}", end="")
                 if len(airports) > 10:
                     print(f" ... dan {len(airports) - 10} lainnya")
                 else:
                     print()
     
-    print("\n" + "-" * 80)
+    print("\n" + "█" * 80)
 
 
-def print_connectivity_check(start: str, end: str, is_connected: bool, 
-                             path: Optional[List[str]], num_transits: int, 
-                             reachable_count: int) -> None:
+def print_connectivity_check(start: str, end: str, is_connected: bool, path: Optional[List[str]], num_transits: int, reachable_count: int) -> None:
     """Mencetak hasil pengecekan konektivitas dengan format yang rapi."""
     print("\n" + "-" * 80)
-    print(f"  ANALISIS KONEKTIVITAS: {start} ↔ {end}")
+    print(f"  ANALISIS KONEKTIVITAS: {start} <-> {end}")
     print("-" * 80)
     
     print(f"\nBandara Asal: {start}")
@@ -384,15 +305,14 @@ def print_connectivity_check(start: str, end: str, is_connected: bool,
     print(f"\nCakupan Jaringan dari {start}:")
     print(f"  Total bandara yang dapat dijangkau: {reachable_count}")
     
-    print("\n" + "-" * 80)
+    print("\n" + "█" * 80)
 
 
-def print_path_details(path: List[str], flight_details: List[Dict], 
-                       use_case_title: str) -> None:
+def print_path_details(path: List[str], flight_details: List[Dict], use_case_title: str) -> None:
     """Mencetak detail jalur dengan format yang rapi untuk screenshot."""
-    print("\n" + "-" * 80)
+    print("\n" + "=" * 80)
     print(f"  {use_case_title}")
-    print("-" * 80)
+    print("=" * 80)
     
     if not path:
         print("Tidak ada rute yang ditemukan!")
@@ -422,7 +342,7 @@ def print_path_details(path: List[str], flight_details: List[Dict],
         print(f"    Stops: {detail['stops']}")
         print(f"    Equipment: {detail['equipment']}")
     
-    print("\n" + "-" * 80)
+    print("\n" + "█" * 80)
 
 
 def main():
@@ -431,7 +351,6 @@ def main():
     print("  BFS ROUTE FINDER - Pencarian Rute Terpendek dengan Queue + BFS")
     print("-" * 80)
     
-    # Initialize DataLoader
     print("\nMEMUAT DATA...")
     loader = DataLoader('routes.csv')
     loader.load_data()
@@ -440,13 +359,11 @@ def main():
     # Initialize BFS
     print("\nMENYIAPKAN ALGORITMA BFS...")
     bfs = BFSShortestPath(loader.graph, loader)
-    
+    print("\n" + "▒" * 80)
+
     # ============================================
     # USE CASE 1: Rute dari KZN ke LED
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 1: Mencari rute dari KZN (Kazan) ke LED (St. Petersburg)")
-    print("-" * 80)
     
     start1, end1 = "KZN", "LED"
     path1 = bfs.find_shortest_path(start1, end1)
@@ -460,9 +377,6 @@ def main():
     # ============================================
     # USE CASE 2: Rute dari SIN ke BKK
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 2: Mencari rute dari SIN (Singapore) ke BKK (Bangkok)")
-    print("-" * 80)
     
     start2, end2 = "SIN", "BKK"
     path2 = bfs.find_shortest_path(start2, end2)
@@ -476,9 +390,6 @@ def main():
     # ============================================
     # USE CASE 3: Rute dari MNL ke KIX
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 3: Mencari rute dari MNL (Manila) ke KIX (Osaka Kansai)")
-    print("-" * 80)
     
     start3, end3 = "MNL", "KIX"
     path3 = bfs.find_shortest_path(start3, end3)
@@ -492,9 +403,6 @@ def main():
     # ============================================
     # USE CASE 4: Rute dengan transit (contoh rute yang membutuhkan lebih dari 1 hop)
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 4: CEK (Chelyabinsk) -> NBC (Nizhnekamsk) - Dengan Transit")
-    print("-" * 80)
     
     start4, end4 = "CEK", "NBC"
     path4 = bfs.find_shortest_path(start4, end4)
@@ -508,9 +416,6 @@ def main():
     # ============================================
     # USE CASE 5: Rute Eropa dengan transit
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 5: ACH (Altenrhein) -> MUC (Munich) - Dengan Transit")
-    print("-" * 80)
     
     start5, end5 = "ACH", "MUC"
     path5 = bfs.find_shortest_path(start5, end5)
@@ -524,9 +429,6 @@ def main():
     # ============================================
     # USE CASE 6: Rute Amerika dengan transit
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 6: FLL (Fort Lauderdale) -> PNS (Pensacola) - Dengan Transit")
-    print("-" * 80)
     
     start6, end6 = "FLL", "PNS"
     path6 = bfs.find_shortest_path(start6, end6)
@@ -540,33 +442,22 @@ def main():
     # ============================================
     # USE CASE 7: Analisis Jangkauan per Level (KZN)
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 7: Analisis Jangkauan per Level dari KZN (Kazan)")
-    print("-" * 80)
     
     start7 = "KZN"
     levels7 = bfs.analyze_reachability_by_level(start7, max_levels=4)
-    print_reachability_analysis(start7, levels7, 
-                                "USE CASE 7: ANALISIS JANGKAUAN PER LEVEL - KZN (Kazan)")
+    print_reachability_analysis(start7, levels7, "USE CASE 7: ANALISIS JANGKAUAN PER LEVEL - KZN (Kazan)")
     
     # ============================================
     # USE CASE 8: Analisis Jangkauan per Level (SIN)
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 8: Analisis Jangkauan per Level dari SIN (Singapore)")
-    print("-" * 80)
     
     start8 = "SIN"
     levels8 = bfs.analyze_reachability_by_level(start8, max_levels=4)
-    print_reachability_analysis(start8, levels8, 
-                                "USE CASE 8: ANALISIS JANGKAUAN PER LEVEL - SIN (Singapore)")
+    print_reachability_analysis(start8, levels8, "USE CASE 8: ANALISIS JANGKAUAN PER LEVEL - SIN (Singapore)")
     
     # ============================================
     # USE CASE 9: Cek Konektivitas - Terhubung
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 9: Cek Konektivitas - Rute Terhubung")
-    print("-" * 80)
     
     start9, end9 = "KZN", "LED"
     is_connected9, path9, transits9, reachable9 = bfs.check_connectivity(start9, end9)
@@ -575,20 +466,14 @@ def main():
     # ============================================
     # USE CASE 10: Cek Konektivitas - Tidak Terhubung
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  USE CASE 10: Cek Konektivitas - Rute Tidak Terhubung")
-    print("-" * 80)
     
     start10, end10 = "KZN", "JFK"  # JFK mungkin tidak terhubung langsung ke jaringan KZN
     is_connected10, path10, transits10, reachable10 = bfs.check_connectivity(start10, end10)
     print_connectivity_check(start10, end10, is_connected10, path10, transits10, reachable10)
     
     # ============================================
-    # Additional Info: Show some available airports
+    # Informasi tambahan: nunjukin bandara yang tersedia di dataset
     # ============================================
-    print("\n\n" + "-" * 80)
-    print("  INFORMASI TAMBAHAN: Daftar Bandara Tersedia (Sample)")
-    print("-" * 80)
     
     airports = loader.get_airport_list()
     print(f"\nTotal bandara dalam dataset: {len(airports)}")
@@ -597,11 +482,6 @@ def main():
         print(f"  - {airport}", end="")
         if (i + 1) % 5 == 0:
             print()
-    
-    print("\n\n" + "-" * 80)
-    print("  PROGRAM SELESAI - Silakan screenshot output di atas")
-    print("-" * 80 + "\n")
-
 
 if __name__ == "__main__":
     main()
